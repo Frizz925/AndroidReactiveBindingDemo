@@ -113,27 +113,39 @@ class MainViewModel(val activity: Activity) {
         if (model.name.isEmpty()) {
             mView.name.error = activity.getString(R.string.ui_error_name_empty)
             hasError = true
+        } else {
+            mView.name.error = null
         }
+
         if (model.email.isEmpty()) {
             mView.email.error = activity.getString(R.string.ui_error_email_empty)
             hasError = true
         } else if (!validateEmail(model.email)) {
             mView.email.error = activity.getString(R.string.ui_error_email_invalid)
             hasError = true
+        } else {
+            mView.email.error = null
         }
+
         if (model.password.isEmpty()) {
             mView.password.error = activity.getString(R.string.ui_error_password_empty)
             hasError = true
+        } else {
+            mView.password.error = null
         }
+
         if (!model.password.equals(model.passwordConfirm)) {
             mView.passwordConfirm.error = activity.getString(R.string.ui_error_password_confirm)
             hasError = true
+        } else {
+            mView.passwordConfirm.error = null
         }
+
         if (hasError) {
             mView.submit.isEnabled = false
-            return
+        } else {
+            mView.submit.isEnabled = model.agree
         }
-        mView.submit.isEnabled = model.agree
     }
 
     private fun validateEmail(email: String): Boolean {

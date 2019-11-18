@@ -24,16 +24,16 @@ class MainView {
     lateinit var genderFemale: RadioButton
 
     @BindView(R.id.spnEducation)
-    lateinit var education: Spinner;
+    lateinit var education: Spinner
 
     @BindView(R.id.chkAgree)
-    lateinit var agree: CheckBox;
+    lateinit var agree: CheckBox
 
     @BindView(R.id.btnSubmit)
-    lateinit var submit: Button;
+    lateinit var submit: Button
 
     @BindView(R.id.btnReset)
-    lateinit var reset: Button;
+    lateinit var reset: Button
 
     @BindView(R.id.txtOutput)
     lateinit var output: TextView

@@ -7,8 +7,9 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.core.content.edit
 import io.reactivex.disposables.Disposable
-import moe.kogane.viewbinding.binding.binders.ModelBinderFactory
-import moe.kogane.viewbinding.binding.binders.ViewBinderFactory
+import moe.kogane.viewbinding.R
+import moe.kogane.viewbinding.binding.binders.ModelBindingManager
+import moe.kogane.viewbinding.binding.binders.ReactiveViewBinder
 import moe.kogane.viewbinding.binding.binders.ViewRefBinder
 import moe.kogane.viewbinding.binding.binders.views.RadioButtonBinder
 import moe.kogane.viewbinding.binding.binders.views.SpinnerBinder
@@ -20,13 +21,13 @@ import moe.kogane.viewbinding.models.Gender
 class MainViewModel(val activity: Activity) {
     var model = MainModel()
 
-    private val mViewBinderFactory = ViewBinderFactory()
-    private val mModelBinderFactory = ModelBinderFactory<MainModel>(mViewBinderFactory)
+    private val mReactiveViewBinder = ReactiveViewBinder()
+    private val mModelBindingManager = ModelBindingManager<MainModel>(mReactiveViewBinder)
 
     private lateinit var mRoot: View
     private lateinit var mView: MainView
 
-    private lateinit var mOutputDisposable: Disposable
+    private lateinit var mDisposable: Disposable
 
     private val mEducationAdapter = ArrayAdapter(
         activity,
@@ -66,7 +67,7 @@ class MainViewModel(val activity: Activity) {
         loadPreferences(model)
 
         mView.education.adapter = mEducationAdapter
-        mModelBinderFactory.run {
+        mModelBindingManager.run {
             registerModel(model)
 
             bindTextView("name", mView.name)
@@ -79,38 +80,27 @@ class MainViewModel(val activity: Activity) {
             bind("gender", mView.genderFemale, mGenderBinder)
             bind("education", mView.education, mEducationBinder)
 
-            mOutputDisposable = subject.subscribe {
-                val agree = if (it.agree) "Yes" else "No"
-                StringBuilder().run {
-                    append("Name: ${it.name}\n")
-                    append("E-mail: ${it.email}\n")
-                    append("Gender: ${it.gender?.text}\n")
-                    append("Education: ${it.education?.text}\n")
-                    append("Agree: ${agree}\n")
-                    mView.output.text = toString()
-                }
-            }
-
-            getSubject<Boolean>("agree").subscribe { t: Boolean ->
-                mView.submit.isEnabled = t
+            mDisposable = subject.subscribe {
+                mView.updateOutput(it)
+                validate(it)
             }
 
             mView.submit.setOnClickListener {
                 savePreferences(model)
-                Toast.makeText(activity, "Registration data saved", Toast.LENGTH_LONG).show()
+                Toast.makeText(activity, R.string.ui_toast_saved, Toast.LENGTH_LONG).show()
             }
             mView.reset.setOnClickListener {
                 model = MainModel()
-                mModelBinderFactory.registerModel(model)
+                mModelBindingManager.registerModel(model)
                 savePreferences(model)
-                Toast.makeText(activity, "Registration data reset", Toast.LENGTH_LONG).show()
+                Toast.makeText(activity, R.string.ui_toast_reset, Toast.LENGTH_LONG).show()
             }
         }
     }
 
     fun unregister() {
-        mModelBinderFactory.unregister()
-        mOutputDisposable.dispose()
+        mModelBindingManager.unregister()
+        mDisposable.dispose()
     }
 
     private fun init(root: View) {
@@ -118,10 +108,44 @@ class MainViewModel(val activity: Activity) {
         mView = ViewRefBinder(root).bind(MainView::class.java)
     }
 
+    private fun validate(model: MainModel) {
+        var hasError = false
+        if (model.name.isEmpty()) {
+            mView.name.error = activity.getString(R.string.ui_error_name_empty)
+            hasError = true
+        }
+        if (model.email.isEmpty()) {
+            mView.email.error = activity.getString(R.string.ui_error_email_empty)
+            hasError = true
+        } else if (!validateEmail(model.email)) {
+            mView.email.error = activity.getString(R.string.ui_error_email_invalid)
+            hasError = true
+        }
+        if (model.password.isEmpty()) {
+            mView.password.error = activity.getString(R.string.ui_error_password_empty)
+            hasError = true
+        }
+        if (!model.password.equals(model.passwordConfirm)) {
+            mView.passwordConfirm.error = activity.getString(R.string.ui_error_password_confirm)
+            hasError = true
+        }
+        if (hasError) {
+            mView.submit.isEnabled = false
+            return
+        }
+        mView.submit.isEnabled = model.agree
+    }
+
+    private fun validateEmail(email: String): Boolean {
+        return true // TODO: I'm lazy
+    }
+
     private fun loadPreferences(model: MainModel) {
         val prefs = activity.getPreferences(Context.MODE_PRIVATE)
         model.name = prefs.getString("name", model.name)!!
         model.email = prefs.getString("email", model.email)!!
+        model.password = prefs.getString("password", model.password)!!
+        model.passwordConfirm = prefs.getString("passwordConfirm", model.passwordConfirm)!!
         model.gender = Gender.valueOf(
             prefs.getString("gender", Gender.MALE.name)!!
         )
@@ -135,8 +159,10 @@ class MainViewModel(val activity: Activity) {
         activity.getPreferences(Context.MODE_PRIVATE).edit {
             putString("name", model.name)
             putString("email", model.email)
-            putString("gender", model.gender?.name)
-            putString("education", model.education?.name)
+            putString("password", model.password)
+            putString("passwordConfirm", model.passwordConfirm)
+            putString("gender", model.gender.name)
+            putString("education", model.education.name)
             putBoolean("agree", model.agree)
             commit()
         }

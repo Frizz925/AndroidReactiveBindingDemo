@@ -10,8 +10,9 @@ import moe.kogane.viewbinding.binding.binders.views.GenericCheckBoxBinder
 import moe.kogane.viewbinding.binding.binders.views.GenericTextViewBinder
 import moe.kogane.viewbinding.binding.binders.views.ViewBinder
 import java.lang.reflect.Field
+import java.util.ArrayList
 
-class ModelBinderFactory<T : Any>(val factory: ViewBinderFactory) {
+class ModelBindingManager<T : Any>(val reactiveBinder: ReactiveViewBinder) {
     val subject = BehaviorSubject.create<T>()
 
     private val mSubjectMap = HashMap<String, Subject<*>>()
@@ -29,6 +30,15 @@ class ModelBinderFactory<T : Any>(val factory: ViewBinderFactory) {
     }
 
     fun unregister() {
+        mDisposableMap.keys.forEach {
+            mDisposableMap[it]?.dispose()
+        }
+        val disposables = ArrayList<Disposable>()
+        mDisposables.forEach {
+            it.dispose()
+            disposables.add(it)
+        }
+        mDisposables.removeAll(disposables)
     }
 
     fun bindTextView(propertyName: String, textView: TextView) {
@@ -44,7 +54,7 @@ class ModelBinderFactory<T : Any>(val factory: ViewBinderFactory) {
         view: V,
         binderClass: Class<out ViewBinder<V, T>>
     ) {
-        mDisposables.add(factory.bind(view, binderClass, getSubject(propertyName)))
+        mDisposables.add(reactiveBinder.bind(view, binderClass, getSubject(propertyName)))
     }
 
     fun <V : View, T> bind(propertyName: String, view: V, binder: ViewBinder<V, T>) {

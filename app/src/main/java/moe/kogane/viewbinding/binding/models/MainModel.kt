@@ -8,7 +8,7 @@ class MainModel {
     public var email = ""
     public var password = ""
     public var passwordConfirm = ""
-    public var gender: Gender? = null
-    public var education: Education? = null
+    public var gender = Gender.MALE
+    public var education = Education.UNDERGRADUATE
     public var agree = false
 }

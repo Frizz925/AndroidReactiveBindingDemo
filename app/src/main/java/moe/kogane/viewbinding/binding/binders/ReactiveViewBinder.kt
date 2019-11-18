@@ -5,7 +5,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.Subject
 import moe.kogane.viewbinding.binding.binders.views.ViewBinder
 
-class ViewBinderFactory {
+class ReactiveViewBinder {
     private val mBinderCache = HashMap<Class<*>, ViewBinder<out View, *>>()
 
     @Suppress("UNCHECKED_CAST")

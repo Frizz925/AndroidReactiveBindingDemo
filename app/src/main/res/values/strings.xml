@@ -14,4 +14,12 @@
     <string name="ui_label_agree">I agree that the information above will not be submitted</string>
     <string name="ui_label_submit">Submit</string>
     <string name="ui_label_reset">Reset</string>
+
+    <string name="ui_toast_saved">Registration data saved</string>
+    <string name="ui_toast_reset">Registration data reset</string>
+    <string name="ui_error_email_empty">E-mail is required</string>
+    <string name="ui_error_email_invalid">Invalid e-mail</string>
+    <string name="ui_error_password_empty">Password is required</string>
+    <string name="ui_error_password_confirm">Password confirmation doesn\'t match</string>
+    <string name="ui_error_name_empty">Name is required</string>
 </resources>

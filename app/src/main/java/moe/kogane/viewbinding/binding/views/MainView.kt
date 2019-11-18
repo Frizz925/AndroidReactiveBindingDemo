@@ -2,39 +2,52 @@ package moe.kogane.viewbinding.binding.views
 
 import android.widget.*
 import moe.kogane.viewbinding.R
-import moe.kogane.viewbinding.binding.annotations.BindView
+import moe.kogane.viewbinding.binding.annotations.BindViewRef
+import moe.kogane.viewbinding.binding.models.MainModel
 
 class MainView {
-    @BindView(R.id.txtName)
+    @BindViewRef(R.id.txtName)
     lateinit var name: TextView
 
-    @BindView(R.id.txtEmail)
+    @BindViewRef(R.id.txtEmail)
     lateinit var email: TextView
 
-    @BindView(R.id.txtPassword)
+    @BindViewRef(R.id.txtPassword)
     lateinit var password: TextView
 
-    @BindView(R.id.txtPasswordConfirm)
+    @BindViewRef(R.id.txtPasswordConfirm)
     lateinit var passwordConfirm: TextView
 
-    @BindView(R.id.rdbGenderMale)
+    @BindViewRef(R.id.rdbGenderMale)
     lateinit var genderMale: RadioButton
 
-    @BindView(R.id.rdbGenderFemale)
+    @BindViewRef(R.id.rdbGenderFemale)
     lateinit var genderFemale: RadioButton
 
-    @BindView(R.id.spnEducation)
+    @BindViewRef(R.id.spnEducation)
     lateinit var education: Spinner
 
-    @BindView(R.id.chkAgree)
+    @BindViewRef(R.id.chkAgree)
     lateinit var agree: CheckBox
 
-    @BindView(R.id.btnSubmit)
+    @BindViewRef(R.id.btnSubmit)
     lateinit var submit: Button
 
-    @BindView(R.id.btnReset)
+    @BindViewRef(R.id.btnReset)
     lateinit var reset: Button
 
-    @BindView(R.id.txtOutput)
+    @BindViewRef(R.id.txtOutput)
     lateinit var output: TextView
+
+    fun updateOutput(model: MainModel) {
+        val agree = if (model.agree) "Yes" else "No"
+        StringBuilder().run {
+            append("Name: ${model.name}\n")
+            append("E-mail: ${model.email}\n")
+            append("Gender: ${model.gender?.text}\n")
+            append("Education: ${model.education?.text}\n")
+            append("Agree: ${agree}\n")
+            output.text = toString()
+        }
+    }
 }
